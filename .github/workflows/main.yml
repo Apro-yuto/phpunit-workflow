@@ -23,6 +23,10 @@ jobs:
           php-version: ${{ matrix.php-version }}
       - name: checkout 
         uses: actions/checkout@v2
+      - name: Docker Compose Build and Up
+        run: |
+          docker-compose build
+          docker-compose up -d
       - name: Copy Environment File
         run: docker-compose exec -T app cp .env.example .env
       # dockerコンテナを起動
