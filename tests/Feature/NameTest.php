@@ -9,6 +9,7 @@ use Tests\TestCase;
 
 class NameTest extends TestCase
 {
+    use RefreshDatabase;
     /**
      * A basic feature test index.
      *
@@ -26,12 +27,11 @@ class NameTest extends TestCase
      */
     public function test_postRegister()
     {
-        $test = Name::factory()->make();
+        $test = Name::factory()->create();
 
-        $response = $this->post('/', [
-            'lastName' => $test->last_name,
-            'firstName' => $test->first_name
+        $this->assertDatabaseHas('names', [
+            'last_name' => $test->last_name,
+            'first_name' => $test->first_name,
         ]);
-        $response->assertRedirect('/');
     }
 }
