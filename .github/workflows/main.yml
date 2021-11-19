@@ -17,31 +17,33 @@ jobs:
       matrix:
         php-version: ['8.0']
     steps:
-      - name: Setup PHP ${{ matrix.php-version }}
-        uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@v2
+      - name: cache vendor
+        id: cache
+        uses: actions/cache@v1
         with:
-          php-version: ${{ matrix.php-version }}
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: Copy Environment File
+          path: ./vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+      - name: composer install
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: composer install -n --prefer-dist
+      - name: copy .env
         run: cp .env.example .env
-      - name: Docker Compose Build and Up
+      - name: generate key
+        run: php artisan key:generate
+      - name: Create Database
         run: |
-          docker-compose build
-          docker-compose up -d
-      # dockerコンテナを起動
-      - name: docker-compose up
-        run: docker-compose up -d
-      - name: Install Dependencies
-        run: docker-compose exec -T app composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-      - name: Generate key
-        run: docker-compose exec -T app php artisan key:generate
-      ## dbの起動を待機
-      - name: Wait DB
-        run : docker-compose exec -T db bash -c "mysqladmin --wait --count 60 ping -proot || exit 1"
-      ## マイグレーション
-      - name: migration
-        run: docker-compose exec -T app php artisan migrate --seed
-      ## test実行
+          mkdir -p database
+          touch database/database.sqlite
+      - name: migrate
+        run: php artisan migrate
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
       - name: Execute tests (Unit and Feature tests) via PHPUnit
-        run: docker-compose exec -T app ./vendor/bin/phpunit
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: vendor/bin/phpunit
