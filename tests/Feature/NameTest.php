@@ -31,7 +31,7 @@ class NameTest extends TestCase
 
         $this->assertDatabaseHas('names', [
             'last_name' => $test->last_name,
-            'first_name' => $test->first_name,
+            'first_name' => $test->firstName,
         ]);
     }
 }
