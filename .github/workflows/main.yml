@@ -21,14 +21,14 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-      - name: checkout 
+      - name: checkout
         uses: actions/checkout@v2
+      - name: Copy Environment File
+        run: cp .env.example .env
       - name: Docker Compose Build and Up
         run: |
           docker-compose build
           docker-compose up -d
-      - name: Copy Environment File
-        run: docker-compose exec -T app cp .env.example .env
       # dockerコンテナを起動
       - name: docker-compose up
         run: docker-compose up -d
