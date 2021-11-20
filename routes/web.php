@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NameController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
